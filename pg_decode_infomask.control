@@ -1,0 +1,5 @@
+# pg_decode_infomask
+comment = 'Set of function to decode infomask hintbits'
+default_version = '0.1'
+
+relocatable = true
