@@ -7,14 +7,16 @@
 #include "access/htup_details.h"
 
 #define PG_GET_XACT_INFOMASK_DETAILS_COLS	6
+#define PG_GET_INFOMASK2_DETAILS_COLS	4
 
 
 PG_MODULE_MAGIC;
 
-Datum
-pg_get_xact_infomask_details(PG_FUNCTION_ARGS);
+Datum pg_get_xact_infomask_details(PG_FUNCTION_ARGS);
+Datum pg_get_infomask2_details(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(pg_get_xact_infomask_details);
+PG_FUNCTION_INFO_V1(pg_get_infomask2_details);
 
 Datum
 pg_get_xact_infomask_details(PG_FUNCTION_ARGS)
@@ -50,4 +52,35 @@ pg_get_xact_infomask_details(PG_FUNCTION_ARGS)
     PG_RETURN_DATUM(HeapTupleGetDatum(heap_form_tuple(tupdesc, values, nulls)));
 }
 
+
+Datum
+pg_get_infomask2_details(PG_FUNCTION_ARGS)
+{
+    TupleDesc    tupdesc;
+    Datum        values[PG_GET_INFOMASK2_DETAILS_COLS];
+    bool         nulls[PG_GET_INFOMASK2_DETAILS_COLS];
+    int	         i = 0;
+    int32        infomask2 = PG_GETARG_INT32(0);
+
+    if (get_call_result_type(fcinfo, NULL, &tupdesc) != TYPEFUNC_COMPOSITE)
+        elog(ERROR, "return type must be a row type");
+
+    tupdesc = CreateTemplateTupleDesc(PG_GET_INFOMASK2_DETAILS_COLS, false);
+    TupleDescInitEntry(tupdesc, ++i, "natts", INT4OID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "keys_updated", BOOLOID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "hot_updated", BOOLOID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "heap_only_tuple", BOOLOID, -1, 0);
+    BlessTupleDesc(tupdesc);
+
+    MemSet(nulls, 0, sizeof(nulls));
+
+    i = 0;
+    values[i++] = Int32GetDatum((infomask2 & HEAP_NATTS_MASK));
+    values[i++] = BoolGetDatum((infomask2 & HEAP_KEYS_UPDATED) != 0);
+    values[i++] = BoolGetDatum((infomask2 & HEAP_HOT_UPDATED) != 0);
+    values[i++] = BoolGetDatum((infomask2 & HEAP_ONLY_TUPLE) != 0);
+
+    /* Returns the record as Datum */
+    PG_RETURN_DATUM(HeapTupleGetDatum(heap_form_tuple(tupdesc, values, nulls)));
+}
 

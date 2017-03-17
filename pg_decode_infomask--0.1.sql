@@ -21,6 +21,17 @@ RETURNS record
 LANGUAGE c COST 10
 AS '$libdir/pg_decode_infomask', 'pg_get_xact_infomask_details';
 
+CREATE OR REPLACE FUNCTION pg_get_infomask2_bits(infomask2 int,
+    OUT natts integer,
+    OUT keys_updated boolean,
+    OUT hot_updated boolean,
+    OUT heap_only_tuple boolean
+)
+RETURNS record
+LANGUAGE c COST 10
+AS '$libdir/pg_decode_infomask', 'pg_get_infomask2_details';
+
+
 CREATE OR REPLACE FUNCTION pg_get_xact_infomask(infomask int,
     OUT xmin_committed boolean,
     OUT xmin_invalid boolean,
