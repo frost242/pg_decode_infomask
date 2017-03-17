@@ -14,12 +14,26 @@ CREATE OR REPLACE FUNCTION pg_get_xact_infomask_bits(infomask int,
     OUT xmin_invalid boolean,
     OUT xmin_frozen boolean,
     OUT xmax_committed boolean,
-    OUT xmax_invalid boolean,
-    OUT xmax_is_multi boolean
+    OUT xmax_invalid boolean
 )
 RETURNS record
 LANGUAGE c COST 10
 AS '$libdir/pg_decode_infomask', 'pg_get_xact_infomask_details';
+
+CREATE OR REPLACE FUNCTION pg_get_lock_infomask_bits(infomask int,
+    OUT is_locked_only boolean,
+    OUT is_locked_upgraded boolean,
+    OUT is_shr_locked boolean,
+    OUT is_excl_locked boolean,
+    OUT is_keyshr_locked boolean,
+    OUT xmax_keyshr_lock boolean,
+    OUT xmax_excl_lock boolean,
+    OUT xmax_lock_only boolean,
+    OUT xmax_is_multi boolean
+)
+RETURNS record
+LANGUAGE c COST 10
+AS '$libdir/pg_decode_infomask', 'pg_get_lock_infomask_details';
 
 CREATE OR REPLACE FUNCTION pg_get_infomask2_bits(infomask2 int,
     OUT natts integer,
@@ -38,13 +52,12 @@ CREATE OR REPLACE FUNCTION pg_get_xact_infomask(infomask int,
     OUT xmin_frozen boolean,
     OUT xmax_committed boolean,
     OUT xmax_invalid boolean,
-    OUT xmax_is_multi boolean,
     OUT xmin_status text[],
     OUT xmax_status text[]
 )
 AS $$
 SELECT xmin_committed, xmin_invalid, xmin_frozen,
-       xmax_committed, xmax_invalid, xmax_is_multi,
+       xmax_committed, xmax_invalid,
        xmin_status.xmin_status, xmax_status.xmax_status
   FROM pg_get_xact_infomask_bits($1) xact,
        LATERAL ( SELECT array_agg(xminstatus) AS xmin_status FROM (	
@@ -59,8 +72,6 @@ SELECT xmin_committed, xmin_invalid, xmin_frozen,
                      SELECT 'COMMITTED' AS xmaxstatus WHERE xmax_committed
                      UNION ALL
                      SELECT 'INVALID' WHERE xmax_invalid
-                     UNION ALL
-                     SELECT 'MULTIXACT' WHERE xmax_is_multi
                      ) s
        ) xmax_status
 $$ LANGUAGE sql;
