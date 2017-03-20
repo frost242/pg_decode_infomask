@@ -34,11 +34,11 @@ pg_get_xact_infomask_details(PG_FUNCTION_ARGS)
         elog(ERROR, "return type must be a row type");
 
     tupdesc = CreateTemplateTupleDesc(PG_GET_XACT_INFOMASK_DETAILS_COLS, false);
-    TupleDescInitEntry(tupdesc, ++i, "xmin_committed", BOOLOID, -1, 0);	    
-    TupleDescInitEntry(tupdesc, ++i, "xmin_invalid", BOOLOID, -1, 0);	    
-    TupleDescInitEntry(tupdesc, ++i, "xmin_frozen", BOOLOID, -1, 0);	    
-    TupleDescInitEntry(tupdesc, ++i, "xmax_committed", BOOLOID, -1, 0);	    
-    TupleDescInitEntry(tupdesc, ++i, "xmax_invalid", BOOLOID, -1, 0);	    
+    TupleDescInitEntry(tupdesc, ++i, "xmin_committed", BOOLOID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "xmin_invalid", BOOLOID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "xmin_frozen", BOOLOID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "xmax_committed", BOOLOID, -1, 0);
+    TupleDescInitEntry(tupdesc, ++i, "xmax_invalid", BOOLOID, -1, 0);
     BlessTupleDesc(tupdesc);
 
     MemSet(nulls, 0, sizeof(nulls));
